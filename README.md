@@ -1,1 +1,1 @@
-# study
+# SpringBoot Admin Page Project
