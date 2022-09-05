@@ -1,35 +1,38 @@
 package com.example.study.model.entity;
 
-//DB의 테이블 이름과 같이 User로
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.time.LocalDateTime;
-import java.util.List;
 
-//@Table(name = "user") DB테이블 이름과 같으면 필요 x
-@Data
+@NoArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor      //기본생성자
-@Entity     // == table
-public class User {
+@Data
+@Entity
+public class Partner {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String account;
-
-    private String password;
+    private String name;
 
     private String status;
 
-    private String email;
+    private String address;
 
-    private String phoneNumber;
+    private String callCenter;
+
+    private String partnerNumber;
+
+    private String businessNumber;
+
+    private String ceoName;
 
     private LocalDateTime registeredAt;
 
@@ -43,7 +46,4 @@ public class User {
 
     private String updatedBy;
 
-    // 1 : N
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private List<OrderDetail> orderDetailList;
 }

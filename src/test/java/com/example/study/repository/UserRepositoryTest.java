@@ -1,14 +1,18 @@
 package com.example.study.repository;
 
 import com.example.study.StudyApplicationTests;
+import com.example.study.model.entity.Item;
 import com.example.study.model.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserRepositoryTest extends StudyApplicationTests {
 
@@ -30,13 +34,25 @@ public class UserRepositoryTest extends StudyApplicationTests {
     }
 
     @Test
-    public void read(@RequestParam Long id) {
-        Optional<User> user = userRepository.findById(2L);
+    @Transactional
+//    public void read(@RequestParam Long id) {
+    public void read() {
+
+        // SELECT * FROM user WHERE id = ?
+//        Optional<User> user = userRepository.findById(7L);
+        Optional<User> user = userRepository.findByAccount("TestUser03");
 
         //2L 유저 있으면 출력
         user.ifPresent(selectUser -> {
-            System.out.println("user : " + selectUser);
-            System.out.println("email : " + selectUser.getEmail());
+            
+            // 1:N 관게 아이템을 foreach돌아서 출력
+            selectUser.getOrderDetailList().stream().forEach(detail -> {
+                Item item = detail.getItem();
+                System.out.println(detail.getItem());     //order_detail의 item_id를 출력
+            });
+
+//            System.out.println("user : " + selectUser);
+//            System.out.println("email : " + selectUser.getEmail());
         });
 
     }
@@ -57,16 +73,18 @@ public class UserRepositoryTest extends StudyApplicationTests {
 
 //    @DeleteMapping("/api/user")
     @Test
+    @Transactional      // 다시 롤백됨
     public void delete() {
-        Optional<User> user = userRepository.findById(1L);
+        Optional<User> user = userRepository.findById(3L);
 
-        Assert.assertTrue(user.isPresent());
+//        Assert.assertTrue(user.isPresent());  //legacy
+        assertTrue(user.isPresent());   //false
 
         user.ifPresent(selectUser -> {
             userRepository.delete(selectUser);
         });
 
-        Optional<User> deleteUser = userRepository.findById(1L);
+        Optional<User> deleteUser = userRepository.findById(3L);
 
         //for test
 //        if(deleteUser.isPresent()) {
@@ -75,7 +93,8 @@ public class UserRepositoryTest extends StudyApplicationTests {
 //            System.out.println("데이터 삭제 데이터 없음");
 //        }
 
-        Assert.assertFalse(deleteUser.isPresent()); //false
+//        Assert.assertFalse(deleteUser.isPresent());   //legacy
+        assertTrue(deleteUser.isPresent()); //false
 
     }
 
