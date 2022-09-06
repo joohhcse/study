@@ -43,7 +43,7 @@ public class User {
 
     private String updatedBy;
 
-    // 1 : N
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private List<OrderDetail> orderDetailList;
+//    // 1 : N
+//    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+//    private List<OrderDetail> orderDetailList;
 }

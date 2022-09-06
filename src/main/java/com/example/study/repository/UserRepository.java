@@ -8,6 +8,9 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository  extends JpaRepository<User, Long> {
+
+    User findFirstByPhoneNumberOrderByIdDesc(String phoneNumber);
+
     // SELECT * FROM user WHERE account = ? << test03, test04
     Optional<User> findByAccount(String account);
 

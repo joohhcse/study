@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UserRepositoryTest extends StudyApplicationTests {
 
@@ -22,17 +22,38 @@ public class UserRepositoryTest extends StudyApplicationTests {
 
     @Test
     public void create() {
+        String account = "Test01";
+        String password = "Test01";
+        String status = "REGISTER";
+        String email = "Test01@gmail.com";
+        String phoneNumber = "010-1111-2222";
+        LocalDateTime registeredAt = LocalDateTime.now();
+        LocalDateTime createdAt = LocalDateTime.now();
+        String createdBy = "AdminServer";
+
         User user = new User();
-        user.setAccount("TestUser03");
-        user.setEmail("TestUser03@gmail.com");
-        user.setPhoneNumber("010-3333-3333");
-        user.setCreatedAt(LocalDateTime.now());
-        user.setCreatedBy("TestUser3");
+        user.setAccount(account);
+        user.setPassword(password);
+        user.setStatus(status);
+        user.setEmail(email);
+        user.setPhoneNumber(phoneNumber);
+        user.setRegisteredAt(registeredAt);
+        user.setCreatedAt(createdAt);
+        user.setCreatedBy(createdBy);
 
         User newUser = userRepository.save(user);
-        System.out.println("newUser : " + newUser);
+        assertNotNull(newUser);
+
     }
 
+    @Test
+    @Transactional
+    public void read() {
+        User user = userRepository.findFirstByPhoneNumberOrderByIdDesc("010-1111-2222");
+        assertNotNull(user);
+    }
+
+/*
     @Test
     @Transactional
 //    public void read(@RequestParam Long id) {
@@ -46,10 +67,10 @@ public class UserRepositoryTest extends StudyApplicationTests {
         user.ifPresent(selectUser -> {
             
             // 1:N 관게 아이템을 foreach돌아서 출력
-            selectUser.getOrderDetailList().stream().forEach(detail -> {
-                Item item = detail.getItem();
-                System.out.println(detail.getItem());     //order_detail의 item_id를 출력
-            });
+//            selectUser.getOrderDetailList().stream().forEach(detail -> {
+//                Item item = detail.getItem();
+//                System.out.println(detail.getItem());     //order_detail의 item_id를 출력
+//            });
 
 //            System.out.println("user : " + selectUser);
 //            System.out.println("email : " + selectUser.getEmail());
@@ -97,5 +118,5 @@ public class UserRepositoryTest extends StudyApplicationTests {
         assertTrue(deleteUser.isPresent()); //false
 
     }
-
+*/
 }

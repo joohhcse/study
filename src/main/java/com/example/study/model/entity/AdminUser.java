@@ -8,34 +8,35 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Entity
-public class OrderGroup {
+public class AdminUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String account;
+
+    private String password;
+
     private String status;
 
-    private String orderType;   //주문의 형태 - 일괄 / 개별
+    private String role;
 
-    private String revAddress;
+    private LocalDateTime lastLoginAt;
 
-    private String paymentType; // 카드 / 현금
+    private LocalDateTime passwordUpdatedAt;
 
-    private BigDecimal totalPrice;
+    private int loginFailCount;
 
-    private Integer totalQuantity;
+    private LocalDateTime registeredAt;
 
-    private LocalDateTime orderAt;
-
-    private LocalDateTime arrivalDate;
+    private LocalDateTime unregisteredAt;
 
     private LocalDateTime createdAt;
 
@@ -44,5 +45,6 @@ public class OrderGroup {
     private LocalDateTime updatedAt;
 
     private String updatedBy;
+
 
 }
