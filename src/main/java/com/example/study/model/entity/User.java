@@ -2,10 +2,7 @@ package com.example.study.model.entity;
 
 //DB의 테이블 이름과 같이 User로
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -22,6 +19,7 @@ import java.util.List;
 @Entity     // == table
 @ToString(exclude = {"orderGroupList"})
 @EntityListeners(AuditingEntityListener.class)
+@Builder
 public class User {
 
     @Id
