@@ -30,7 +30,7 @@ public class User {
 
     private String password;
 
-    private String status;
+    private String status;  // REGISTERED / UNREGISTERED / WAITING
 
     private String email;
 
