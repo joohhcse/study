@@ -2,7 +2,9 @@ package com.example.study.model.entity;
 
 //DB의 테이블 이름과 같이 User로
 
+import com.example.study.model.enumClass.UserStatus;
 import lombok.*;
+import lombok.experimental.Accessors;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -20,6 +22,7 @@ import java.util.List;
 @ToString(exclude = {"orderGroupList"})
 @EntityListeners(AuditingEntityListener.class)
 @Builder
+@Accessors(chain = true)
 public class User {
 
     @Id
@@ -30,7 +33,8 @@ public class User {
 
     private String password;
 
-    private String status;  // REGISTERED / UNREGISTERED / WAITING
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;  // REGISTERED / UNREGISTERED / WAITING
 
     private String email;
 
