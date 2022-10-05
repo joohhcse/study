@@ -2,6 +2,7 @@ package com.example.study.controller.api;
 
 import com.example.study.controller.CrudController;
 import com.example.study.ifs.CrudInterface;
+import com.example.study.model.entity.Item;
 import com.example.study.model.network.Header;
 import com.example.study.model.network.request.ItemApiRequest;
 import com.example.study.model.network.response.ItemApiResponse;
@@ -14,17 +15,23 @@ import javax.annotation.PostConstruct;
 @RestController
 @RequestMapping("/api/item")
 //@RequiredArgsConstructor
-public class ItemApiController extends CrudController<ItemApiRequest, ItemApiResponse> {
+public class ItemApiController extends CrudController<ItemApiRequest, ItemApiResponse, Item> {
 
-    @Autowired
-    private ItemApiLogicService itemApiLogicService;
+//BaseService 장점 :
+//UserApiController 처럼 상속을 받고
+//@PostMapping, @RequestBody 등 반복적인 작업을 하지 않아도 됨
+//CRUD가 있는 서비스 로직에만 신경쓰면 된다    
 
-    @PostConstruct
-    public void init() {
-        this.baseService = itemApiLogicService;
-    }
+//2nd lesson
+//    @Autowired
+//    private ItemApiLogicService itemApiLogicService;
+//
+//    @PostConstruct
+//    public void init() {
+//        this.baseService = itemApiLogicService;
+//    }
 
-
+//1st lesson
 //    @Override
 //    @PostMapping("")    // /api/item
 //    public Header<ItemApiResponse> create(@RequestBody Header<ItemApiRequest> request) {
