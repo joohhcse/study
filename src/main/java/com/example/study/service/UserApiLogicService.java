@@ -1,30 +1,44 @@
 package com.example.study.service;
 
 import com.example.study.ifs.CrudInterface;
+import com.example.study.model.entity.Item;
+import com.example.study.model.entity.OrderGroup;
 import com.example.study.model.entity.User;
 import com.example.study.model.enumClass.UserStatus;
 import com.example.study.model.network.Header;
+import com.example.study.model.network.Pagination;
+import com.example.study.model.network.request.ItemApiRequest;
 import com.example.study.model.network.request.UserApiRequest;
+import com.example.study.model.network.response.ItemApiResponse;
+import com.example.study.model.network.response.OrderGroupApiResponse;
 import com.example.study.model.network.response.UserApiResponse;
+import com.example.study.model.network.response.UserOrderInfoApiResponse;
 import com.example.study.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserApiLogicService implements CrudInterface<UserApiRequest, UserApiResponse> {
+public class UserApiLogicService extends BaseService<UserApiRequest, UserApiResponse, User> {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final OrderGroupApiLogicService orderGroupApiLogicService;
+
+    private final ItemApiLogicService itemApiLogicService;
+
+//    @Autowired
+//    private UserRepository userRepository;
 
     // 1. request data
     // 2. user 생성
     // 3. 생성된 데이터 -> UserApiResponse return
-
     @Override
     public Header<UserApiResponse> create(Header<UserApiRequest> request) {
 
@@ -40,10 +54,10 @@ public class UserApiLogicService implements CrudInterface<UserApiRequest, UserAp
                 .email(userApiRequest.getEmail())
                 .registeredAt(LocalDateTime.now())
                 .build();
-        User newUser = userRepository.save(user);
+        User newUser = baseRepository.save(user);
 
         // 3. 생성된 데이터 -> userApiResponse return
-        return response(newUser);
+        return Header.OK(response(newUser));
     }
 
     @Override
@@ -54,8 +68,10 @@ public class UserApiLogicService implements CrudInterface<UserApiRequest, UserAp
         // user -> userApiResponse return
 
         //람다식으로
-        return userRepository.findById(id)
+        return baseRepository.findById(id)
             .map(user -> response(user))
+//            .map(userApiResponse -> Header.OK(userApiResponse))   //1
+            .map(Header::OK)            //2
             .orElseGet(
                     () -> Header.ERROR("데이터 없음")
             );
@@ -63,7 +79,31 @@ public class UserApiLogicService implements CrudInterface<UserApiRequest, UserAp
 
     @Override
     public Header<UserApiResponse> update(Header<UserApiRequest> request) {
-        return null;
+        // 1. data
+        UserApiRequest userApiRequest = request.getData();
+
+        // 2. id -> user 데이터 를 찾고
+        Optional<User> optional = baseRepository.findById(userApiRequest.getId());
+//        Optional<User> optional = userRepository.findById(userApiRequest.getId());
+
+        return optional.map(user -> {
+                    // 3. data -> update
+                    // id
+                    user.setAccount(userApiRequest.getAccount())
+                            .setPassword(userApiRequest.getPassword())
+                            .setStatus(userApiRequest.getStatus())
+                            .setPhoneNumber(userApiRequest.getPhoneNumber())
+                            .setEmail(userApiRequest.getEmail())
+                            .setRegisteredAt(userApiRequest.getRegisteredAt())
+                            .setUnregisteredAt(userApiRequest.getUnregisteredAt())
+                    ;
+                    return user;
+
+                })
+                .map(user -> baseRepository.save(user))             // update -> newUser
+                .map(user -> response(user))                        // userApiResponse
+                .map(Header::OK)
+                .orElseGet(()->Header.ERROR("데이터 없음"));
     }
 
     @Override
@@ -71,13 +111,32 @@ public class UserApiLogicService implements CrudInterface<UserApiRequest, UserAp
         return null;
     }
 
-    private Header<UserApiResponse> response(User user) {
+    public Header<List<UserApiResponse>> search(Pageable pageable) {
+
+//        Page<User> users = userRepository.findAll(pageable);
+        Page<User> users = baseRepository.findAll(pageable);
+
+        List<UserApiResponse> userApiResponseList = users.stream()
+                .map(user -> response(user))
+                .collect(Collectors.toList());
+
+        Pagination pagination = Pagination.builder()
+                .totalPages(users.getTotalPages())
+                .totalElements(users.getTotalElements())
+                .currentPage(users.getNumber())
+                .currentElements(users.getNumberOfElements())
+                .build();
+
+        return Header.OK(userApiResponseList,pagination);
+    }
+
+    private UserApiResponse response(User user){
         // user -> userApiResponse
 
         UserApiResponse userApiResponse = UserApiResponse.builder()
                 .id(user.getId())
                 .account(user.getAccount())
-                .password(user.getPassword())   // todo 암호화, 길이
+                .password(user.getPassword()) // todo 암호화, 길이
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
                 .status(user.getStatus())
@@ -85,7 +144,39 @@ public class UserApiLogicService implements CrudInterface<UserApiRequest, UserAp
                 .unregisteredAt(user.getUnregisteredAt())
                 .build();
 
-        // Header + data return
-        return Header.OK(userApiResponse);
+        return userApiResponse;
+    }
+
+    public Header<UserOrderInfoApiResponse> orderInfo(Long id) {
+
+        // user
+        User user = baseRepository.getOne(id);
+        UserApiResponse userApiResponse = response(user);
+
+
+        // orderGorup
+        List<OrderGroup> orderGroupList = user.getOrderGroupList();
+        List<OrderGroupApiResponse> orderGroupApiResponseList = orderGroupList.stream()
+                .map(orderGroup -> {
+                    OrderGroupApiResponse orderGroupApiResponse = orderGroupApiLogicService.response(orderGroup).getData();
+
+                    // item api response
+                    List<ItemApiResponse> itemApiResponseList = orderGroup.getOrderDetailList().stream()
+                            .map(detail -> detail.getItem())
+                            .map(item -> itemApiLogicService.response(item).getData())
+                            .collect(Collectors.toList());
+
+                    orderGroupApiResponse.setItemApiResponseList(itemApiResponseList);
+                    return orderGroupApiResponse;
+                })
+                .collect(Collectors.toList());
+
+        userApiResponse.setOrderGroupApiResponseList(orderGroupApiResponseList);
+        UserOrderInfoApiResponse userOrderInfoApiResponse = UserOrderInfoApiResponse.builder()
+                .userApiResponse(userApiResponse)
+                .build();
+
+
+        return Header.OK(userOrderInfoApiResponse);
     }
 }
