@@ -1,6 +1,6 @@
 (function ($) {
 
-    var maxBtnSize = 7;              // 검색 하단 최대 범위
+    var maxBtnSize = 10;              // 검색 하단 최대 범위
     var indexBtn = [];               // 인덱스 버튼
 
     // 페이징 처리 데이터
