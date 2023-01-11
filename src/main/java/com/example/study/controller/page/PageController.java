@@ -30,4 +30,13 @@ public class PageController {
                 .addObject("code", "user")
                 ;
     }
+
+    @RequestMapping("/square")
+    public ModelAndView main() {
+        return new ModelAndView("/pages/square")
+                .addObject("menuList", adminMenuService.getAdminMenu())
+                .addObject("code", "user")
+                ;
+    }
+
 }
